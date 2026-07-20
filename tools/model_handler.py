@@ -34,9 +34,8 @@ MODEL_PRIORITY = [
 
 class ProblemAnalysis(BaseModel):
     """
-    [Data structure representing the categorized problem and its markdown content]
+    [Data structure representing the problem and its markdown content]
     """
-    category: str
     title: str
     markdownContent: str
 
@@ -153,17 +152,17 @@ def analyzeProblem(problemHtml: str) -> ProblemAnalysis:
     
     prompt = (
         "You are an expert competitive programming assistant. I will provide you with the HTML of a problem statement.\n"
-        "Your task is to analyze it, determine its optimal expected time complexity class out of: "
-        "sublinear, linear, polynomial, exponential. "
-        "Extract and format the problem into a comprehensive Markdown document.\n\n"
+        "Your task is to analyze it, extract and format the problem into a comprehensive Markdown document.\n\n"
         "Important Guidelines:\n"
-        "1. Start your response EXACTLY with these two lines:\n"
-        "Category: <complexity_class>\n"
+        "1. Start your response EXACTLY with this line:\n"
         "Title: <Problem Title>\n\n"
-        "2. After those two lines, provide the full Markdown content for the problem. Use the following headers:\n"
+        "2. After that line, provide the full Markdown content for the problem. Use the following headers:\n"
         "   # <Problem Title>\n"
         "   ## Statement\n"
         "   ## Constraints\n"
+        "   ## Input and Output Format\n"
+        "   ### Input\n"
+        "   ### Output\n"
         "   ## Input and Output Instances\n"
         "3. Make the main problem statement description bigger, more detailed, and comprehensive.\n"
         "4. Ensure the constraints are comprehensive, covering all bounds and conditions explicitly.\n"
@@ -197,13 +196,11 @@ def analyzeProblem(problemHtml: str) -> ProblemAnalysis:
     
     text = response.text.strip()
     
-    categoryMatch = re.search(r"Category:\s*(sublinear|linear|polynomial|exponential)", text, re.IGNORECASE)
     titleMatch = re.search(r"Title:\s*(.+)", text, re.IGNORECASE)
     
-    category = categoryMatch.group(1).lower() if categoryMatch else "linear"
     title = titleMatch.group(1).strip() if titleMatch else "unknown_problem"
     
-    markdownContent = re.sub(r"^(Category:.*?\nTitle:.*?\n+)", "", text, flags=re.IGNORECASE | re.MULTILINE)
+    markdownContent = re.sub(r"^(Title:.*?\n+)", "", text, flags=re.IGNORECASE | re.MULTILINE)
     if markdownContent.startswith("```markdown"):
         markdownContent = markdownContent[11:]
     if markdownContent.startswith("```"):
@@ -212,35 +209,7 @@ def analyzeProblem(problemHtml: str) -> ProblemAnalysis:
         markdownContent = markdownContent[:-3]
     markdownContent = markdownContent.strip()
     
-    return ProblemAnalysis(category=category, title=title, markdownContent=markdownContent)
+    return ProblemAnalysis(title=title, markdownContent=markdownContent)
 
 
-def saveProblemFiles(analysisResult: ProblemAnalysis) -> None:
-    """
-    [Saves the problem data into standard markdown format]
-    
-    Takes:
-    	analysisResult (ProblemAnalysis): The structured problem data.
-    
-    Gives:
-    	None: Does not return anything.
-    """
-    problemSlug = toSnakeCase(analysisResult.title)
-    targetDir = os.path.join(CORE_DIRECTORY, analysisResult.category, problemSlug)
-    os.makedirs(targetDir, exist_ok=True)
-    
-    problemPath = os.path.join(targetDir, "problem.md")
-    with open(problemPath, "w", encoding="utf-8") as f:
-        f.write(analysisResult.markdownContent)
-        
-    solutionContent = "# [Naive / Better / Optimal] Solution\n\n" + \
-                      "## Idea\n\n" + \
-                      "## Pseudocode\n\n" + \
-                      "## Analysis\n\n" + \
-                      "## Pros and Cons\n"
-                      
-    solutionPath = os.path.join(targetDir, "solution.md")
-    with open(solutionPath, "w", encoding="utf-8") as f:
-        f.write(solutionContent)
-        
-    logging.info("Successfully saved problem to: " + targetDir)
+
