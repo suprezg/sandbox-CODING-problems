@@ -75,7 +75,7 @@ class CodeforcesDirManager(BaseDirManager):
             
         solutionPath = os.path.join(questionDir, "solution.md")
         if not os.path.exists(solutionPath):
-            solutionContent = "# [Naive / Better / Optimal] Solution\n\n## Idea\n\n## Pseudocode\n\n## Analysis\n\n## Pros and Cons\n"
+            solutionContent = "# [Naive / Better / Optimal] Solution\n\n## Idea\n\n## Pseudocode\n\n### Solver\n\n### Verifier\n\n## Analysis\n\n### Time Complexity\n\n### Space Complexity\n\n## Pros and Cons\n"
             with open(solutionPath, "w", encoding="utf-8") as f:
                 f.write(solutionContent)
         
@@ -136,7 +136,7 @@ class AtcoderDirManager(BaseDirManager):
             
         solutionPath = os.path.join(questionDir, "solution.md")
         if not os.path.exists(solutionPath):
-            solutionContent = "# [Naive / Better / Optimal] Solution\n\n## Idea\n\n## Pseudocode\n\n## Analysis\n\n## Pros and Cons\n"
+            solutionContent = "# [Naive / Better / Optimal] Solution\n\n## Idea\n\n## Pseudocode\n\n### Solver\n\n### Verifier\n\n## Analysis\n\n### Time Complexity\n\n### Space Complexity\n\n## Pros and Cons\n"
             with open(solutionPath, "w", encoding="utf-8") as f:
                 f.write(solutionContent)
                 
@@ -188,7 +188,7 @@ class LeetcodeDirManager(BaseDirManager):
             
         solutionPath = os.path.join(questionDir, "solution.md")
         if not os.path.exists(solutionPath):
-            solutionContent = "# [Naive / Better / Optimal] Solution\n\n## Idea\n\n## Pseudocode\n\n## Analysis\n\n## Pros and Cons\n"
+            solutionContent = "# [Naive / Better / Optimal] Solution\n\n## Idea\n\n## Pseudocode\n\n### Solver\n\n### Verifier\n\n## Analysis\n\n### Time Complexity\n\n### Space Complexity\n\n## Pros and Cons\n"
             with open(solutionPath, "w", encoding="utf-8") as f:
                 f.write(solutionContent)
                 
@@ -243,7 +243,7 @@ class CodechefDirManager(BaseDirManager):
             
         solutionPath = os.path.join(questionDir, "solution.md")
         if not os.path.exists(solutionPath):
-            solutionContent = "# [Naive / Better / Optimal] Solution\n\n## Idea\n\n## Pseudocode\n\n## Analysis\n\n## Pros and Cons\n"
+            solutionContent = "# [Naive / Better / Optimal] Solution\n\n## Idea\n\n## Pseudocode\n\n### Solver\n\n### Verifier\n\n## Analysis\n\n### Time Complexity\n\n### Space Complexity\n\n## Pros and Cons\n"
             with open(solutionPath, "w", encoding="utf-8") as f:
                 f.write(solutionContent)
                 
@@ -301,7 +301,7 @@ class AdventofcodeDirManager(BaseDirManager):
             
         solutionPath = os.path.join(questionDir, "solution.md")
         if not os.path.exists(solutionPath):
-            solutionContent = "# [Naive / Better / Optimal] Solution\n\n## Idea\n\n## Pseudocode\n\n## Analysis\n\n## Pros and Cons\n"
+            solutionContent = "# [Naive / Better / Optimal] Solution\n\n## Idea\n\n## Pseudocode\n\n### Solver\n\n### Verifier\n\n## Analysis\n\n### Time Complexity\n\n### Space Complexity\n\n## Pros and Cons\n"
             with open(solutionPath, "w", encoding="utf-8") as f:
                 f.write(solutionContent)
                 
