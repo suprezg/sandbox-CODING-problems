@@ -6,7 +6,6 @@ import os
 from abc import ABC, abstractmethod
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CORE_DIRECTORY = os.path.join(PROJECT_ROOT, "core")
 
 class BaseDirManager(ABC):
     """
@@ -41,7 +40,7 @@ class CodeforcesDirManager(BaseDirManager):
         Gives:
         	None: Does not return anything.
         """
-        cfDir = os.path.join(CORE_DIRECTORY, "codeforces")
+        cfDir = os.path.join(PROJECT_ROOT, "codeforces")
         os.makedirs(cfDir, exist_ok=True)
         
         contestStr = extractedData.get("contestNumber", "0")
@@ -98,7 +97,7 @@ class AtcoderDirManager(BaseDirManager):
         Gives:
         	None: Does not return anything.
         """
-        atDir = os.path.join(CORE_DIRECTORY, "atcoder")
+        atDir = os.path.join(PROJECT_ROOT, "atcoder")
         os.makedirs(atDir, exist_ok=True)
         
         contestName = extractedData.get("contestName", "unknown")
@@ -159,7 +158,7 @@ class LeetcodeDirManager(BaseDirManager):
         Gives:
         	None: Does not return anything.
         """
-        lcDir = os.path.join(CORE_DIRECTORY, "leetcode")
+        lcDir = os.path.join(PROJECT_ROOT, "leetcode")
         os.makedirs(lcDir, exist_ok=True)
         
         questionIdStr = extractedData.get("questionId", "0")
@@ -211,7 +210,7 @@ class CodechefDirManager(BaseDirManager):
         Gives:
         	None: Does not return anything.
         """
-        ccDir = os.path.join(CORE_DIRECTORY, "codechef")
+        ccDir = os.path.join(PROJECT_ROOT, "codechef")
         os.makedirs(ccDir, exist_ok=True)
         
         questionCode = extractedData.get("questionCode", "UNKNOWN")
@@ -266,7 +265,7 @@ class AdventofcodeDirManager(BaseDirManager):
         Gives:
         	None: Does not return anything.
         """
-        aocDir = os.path.join(CORE_DIRECTORY, "adventofcode")
+        aocDir = os.path.join(PROJECT_ROOT, "adventofcode")
         os.makedirs(aocDir, exist_ok=True)
         
         yearStr = extractedData.get("year", "0")

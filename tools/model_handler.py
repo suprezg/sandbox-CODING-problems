@@ -11,7 +11,6 @@ from google import genai
 from pydantic import BaseModel
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CORE_DIRECTORY = os.path.join(PROJECT_ROOT, "core")
 DATA_DIRECTORY = os.path.join(PROJECT_ROOT, "data")
 
 MODEL_MAPPING = {
