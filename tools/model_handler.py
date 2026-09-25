@@ -7,11 +7,15 @@ import json
 import re
 import datetime
 import logging
+import time
 from google import genai
 from pydantic import BaseModel
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIRECTORY = os.path.join(PROJECT_ROOT, "data")
+
+MAX_RETRIES = 3
+RETRY_DELAY_SECONDS = 30
 
 MODEL_MAPPING = {
     "Gemini 3.5 Flash": "gemini-3.5-flash",
@@ -43,6 +47,16 @@ class ModelManager:
     [Manages the state and pooling of AI models]
     """
     def __init__(self, stateFile="models_state.json"):
+        """
+        [Initializes the ModelManager with state file path and loads state]
+        
+        Takes:
+        	self (ModelManager): The instance of the manager.
+        	stateFile (str): Name of the state file.
+        
+        Gives:
+        	None: Does not return anything.
+        """
         os.makedirs(DATA_DIRECTORY, exist_ok=True)
         self.stateFile = os.path.join(DATA_DIRECTORY, stateFile)
         self.state = self.loadState()
@@ -134,7 +148,7 @@ def toSnakeCase(title: str) -> str:
 
 def analyzeProblem(problemHtml: str) -> ProblemAnalysis:
     """
-    [Analyzes problem HTML using Gemini]
+    [Analyzes problem HTML using Gemini API with automatic retries and model failover]
     
     Takes:
     	problemHtml (str): Raw problem HTML.
@@ -171,28 +185,61 @@ def analyzeProblem(problemHtml: str) -> ProblemAnalysis:
     )
     
     response = None
-    while True:
+    lastError = None
+    
+    for attempt in range(1, MAX_RETRIES + 1):
         modelName, apiModeName = modelManager.getBestModel()
         if not modelName:
-            print("All models limits have been depleted. Try next day.")
-            raise Exception("All models limits have been depleted. Try next day.")
+            depletedMessage = "All models limits have been depleted. Try next day."
+            logging.error(depletedMessage)
+            print(depletedMessage)
+            raise Exception(depletedMessage)
             
-        logging.info("Trying model: " + modelName)
+        logging.info("Attempt " + str(attempt) + " of " + str(MAX_RETRIES) + ": Trying model " + modelName)
         
         try:
             response = client.models.generate_content(
                 model=apiModeName,
                 contents=prompt
             )
+            logging.info("Successfully received response from model " + modelName + " on attempt " + str(attempt) + ".")
             break
         except Exception as e:
+            lastError = e
             errorString = str(e).lower()
+            logging.warning("Attempt " + str(attempt) + " of " + str(MAX_RETRIES) + " failed using model " + modelName + ": " + str(e))
+            
             if "429" in errorString or "quota" in errorString or "exhausted" in errorString:
                 logging.warning("Model " + modelName + " exhausted its limits. Marking as depleted.")
                 modelManager.markExhausted(modelName)
+            elif "503" in errorString or "unavailable" in errorString or "high demand" in errorString:
+                logging.warning("Model " + modelName + " is experiencing high demand (503 UNAVAILABLE).")
+                
+            if attempt < MAX_RETRIES:
+                retryMessage = (
+                    "Error on attempt " + str(attempt) + " of " + str(MAX_RETRIES) + ": " + str(e) + 
+                    "\nWaiting for " + str(RETRY_DELAY_SECONDS) + " seconds before retrying (Attempt " + 
+                    str(attempt + 1) + " of " + str(MAX_RETRIES) + ")..."
+                )
+                print(retryMessage)
+                logging.info("Sleeping for " + str(RETRY_DELAY_SECONDS) + " seconds before next retry...")
+                time.sleep(RETRY_DELAY_SECONDS)
             else:
-                raise
-    
+                exhaustedRetriesMessage = (
+                    "Maximum retries (" + str(MAX_RETRIES) + ") reached. Failed to analyze problem after " + 
+                    str(MAX_RETRIES) + " attempts with " + str(RETRY_DELAY_SECONDS) + 
+                    "-second wait intervals.\nLast error encountered: " + str(e)
+                )
+                print(exhaustedRetriesMessage)
+                logging.error(exhaustedRetriesMessage)
+                raise Exception(exhaustedRetriesMessage) from lastError
+                
+    if not response or not response.text:
+        noResponseMessage = "Empty or null response received from model after " + str(MAX_RETRIES) + " attempts."
+        logging.error(noResponseMessage)
+        print(noResponseMessage)
+        raise Exception(noResponseMessage)
+        
     text = response.text.strip()
     
     titleMatch = re.search(r"Title:\s*(.+)", text, re.IGNORECASE)
@@ -209,6 +256,3 @@ def analyzeProblem(problemHtml: str) -> ProblemAnalysis:
     markdownContent = markdownContent.strip()
     
     return ProblemAnalysis(title=title, markdownContent=markdownContent)
-
-
-
